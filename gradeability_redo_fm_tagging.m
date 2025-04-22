@@ -2,16 +2,20 @@ clear
 clc
 close all
 
+
 %% Inputs
 wdist = makedist('Normal','mu',60000,'sigma',5000); %weight [N]
-% d1dist = makedist('Normal','mu',1.8,'sigma',0.025); %cg to rear contact point [m]
-d1dist = makedist('Uniform','Lower',0.5,'Upper',1.9); %cg to rear contact point [m]
-d2dist =  makedist('Normal','mu',1.5,'sigma',0.1); %cg to front contact point [m]
+% wdist = makedist('Uniform','lower',50000,'upper',70000);
+d1dist = makedist('Normal','mu',1.8,'sigma',0.5); %cg to rear contact point [m]
+% d1dist = makedist('Uniform','Lower',0.5,'Upper',1.9); %cg to rear contact point [m]
+d2dist =  makedist('Normal','mu',1.5,'sigma',0.5); %cg to front contact point [m]
+% d2dist = makedist('Uniform','Lower',1.3,'Upper',1.7);
 h = 0.619; %cg height off ground [m] CHECK THIS VALUE!!!
 k = 160000; %spring constant [N/m]
 r = 0.47; % radius of tire [m] 
-mu = 0.65; %input('coefficient of static friction: ') 
-mtdist = makedist('Normal','mu',515,'sigma',100); %Maximum engine torque at crank [Nm]
+mu = 0.8; %input('coefficient of static friction: ') 
+mtdist = makedist('Normal','mu',515,'sigma',150); %Maximum engine torque at crank [Nm]
+% mtdist = makedist('Uniform','lower',215,'upper',715);
 gearing = 39.9; %global gear reduction
 g = 9.81;
 
@@ -155,12 +159,16 @@ for j = 1:nMC
 
 end
 
+edges = 0:1:40;
 figure;
-histogram(crit)
-xlabel('Critical Grade [deg]')
+histogram(crit,edges,'EdgeColor','none','FaceAlpha',1,'FaceColor',[0 0.6902 0.9412]);
+xlabel('Critical Grade, degrees','FontSize',12)
+hold on
+critfail = crit(find(crit <= threshold));
+histogram(critfail,edges,'EdgeColor','none','FaceAlpha',1,'FaceColor',[1 0.2 0.2]);
+fontname('Times New Roman')
 
 figure;
-title('Vehicle Weight [N]')
 subplot(2,2,1)
 subhist(whistory,wfail,0.95,30)
 xlabel('Subset of all failures')
@@ -176,7 +184,8 @@ hold on
 subplot(2,2,4)
 subhist(whistory,wfm3,0.95,30)
 xlabel('Subset of torque failures')
-hold on
+sgtitle('Vehicle Weight','FontSize',12,'FontWeight','bold')
+fontname('Times New Roman')
 wprob = failcases(whistory,wfail,0.95);
 wprob1 = failcases(whistory,wfm1,0.95);
 wprob2 = failcases(whistory,wfm2,0.95);
@@ -198,6 +207,8 @@ hold on
 subplot(2,2,4)
 subhist(d1history,d1fm3,0.95,30)
 xlabel('Subset of torque failures')
+sgtitle('CG to R. Wheel Distance','FontSize',12,'FontWeight','bold')
+fontname('Times New Roman')
 d1prob = failcases(d1history,d1fail,0.95);
 d1prob1 = failcases(d1history,d1fm1,0.95);
 d1prob2 = failcases(d1history,d1fm2,0.95);
@@ -219,6 +230,8 @@ hold on
 subplot(2,2,4)
 subhist(d2history,d2fm3,0.95,30)
 xlabel('Subset of torque failures')
+sgtitle('CG to F. Wheel Distance','FontSize',12,'FontWeight','bold')
+fontname('Times New Roman')
 d2prob = failcases(d2history,d1fail,0.95);
 d2prob1 = failcases(d2history,d2fm1,0.95);
 d2prob2 = failcases(d2history,d2fm2,0.95);
@@ -240,6 +253,8 @@ hold on
 subplot(2,2,4)
 subhist(mthistory,mtfm3,0.95,30)
 xlabel('Subset of torque failures')
+sgtitle('Peak Motor Torque','FontSize',12,'FontWeight','bold')
+fontname('Times New Roman')
 mtprob = failcases(mthistory,mtfail,0.95);
 mtprob1 = failcases(mthistory,mtfm1,0.95);
 mtprob2 = failcases(mthistory,mtfm2,0.95);

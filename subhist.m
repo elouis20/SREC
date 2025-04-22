@@ -2,10 +2,10 @@ function x = subhist(A,B,err,nbins)
     Amax = max(A);
     Amin = min(A);
     edges = linspace(Amin,Amax,nbins);
-    Adata = histogram(A,edges);
+    Adata = histogram(A,edges,'EdgeColor','none','FaceAlpha',1,'FaceColor',[0 0.6902 0.9412]);
     Asize = size(A,2);
     hold on
-    Bdata = histogram(B,edges);
+    Bdata = histogram(B,edges,'EdgeColor','none','FaceAlpha',1,'FaceColor',[1 0.2 0.2]);
     Bsize = size(B,2);
     hold on
 
@@ -50,12 +50,16 @@ function x = subhist(A,B,err,nbins)
         modeB = linintersect(x1b, y1b, x2b, y2b, x3b, y3b, x4b, y4b);
     end
 
+    maxBinSize = max(Adata.Values);
+    boundheight = 1.1*maxBinSize;
+
     Bbounds = failprob(B,err);
-    plot([Bbounds(1),Bbounds(1)],[0,0.1*size(A,2)],'--k','LineWidth',1)
-    plot([Bbounds(2),Bbounds(2)],[0,0.1*size(A,2)],'--k','LineWidth',1)
-    plot([modeB,modeB],[0,0.1*size(A,2)],'-b','LineWidth',2)
+    plot([Bbounds(1),Bbounds(1)],[0,boundheight],'Color',[0.7 0 0],'LineStyle','--','LineWidth',2)
+    plot([Bbounds(2),Bbounds(2)],[0,boundheight],'Color',[0.7 0 0],'LineStyle','--','LineWidth',2)
+    % plot([modeB,modeB],[0,boundheight],'-b','LineWidth',2)
     hold on
     Abounds = failprob(A,err);
-    plot([Abounds(1),Abounds(1)],[0,0.1*size(A,2)],'-r','LineWidth',1)
-    plot([Abounds(2),Abounds(2)],[0,0.1*size(A,2)],'-r','LineWidth',1)
+    plot([Abounds(1),Abounds(1)],[0,boundheight],'Color',[0 0 0.7],'LineStyle','-','LineWidth',2)
+    plot([Abounds(2),Abounds(2)],[0,boundheight],'Color',[0 0 0.7],'LineStyle','-','LineWidth',2)
+    fontname('Times New Roman')
 end

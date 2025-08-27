@@ -1,4 +1,11 @@
 function x = subfail(A,B,C,nbins)
+%This function plotted two BTS on the same histogram. This was done to make
+%demonstration images that show how individual failure modes have a sub-BTS
+%within the total BTS. This function is not called in the main body of the
+%SREC models (Goldstein-Price and Gradeability), but was used to make
+%figures
+
+
     Amax = max(A);
     Amin = min(A);
     edges = linspace(Amin,Amax,nbins);

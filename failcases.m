@@ -1,6 +1,19 @@
 function prob = failcases(A,B,err)
+
+%This function used in SREC method. This function takes an input set and
+%below threshold set, BTS. The BTS can either be composed of failures due
+%to all failure modes or due to an individual failrue mode. This code
+%divides the input space into regions according to probability intervals
+%constructed around the input space and BTS. This code also constructs the
+%probability tables.
+
+%A is the input set
+%B is the BTS
+%err is the probability interval bounds. Set to 0.95 for intervals to
+%contain 95% of values within the set.
+
     Asize = length(A); %number of values in input set
-    Bsize = length(B); %number of values in failing set
+    Bsize = length(B); %number of values in below-threshold set
     Abounds = failprob(A,err);
     Bbounds = failprob(B,err);%two-tailed probability for A and B
 
@@ -12,7 +25,10 @@ function prob = failcases(A,B,err)
             Asub2 = A(find(A > bounds(length(bounds)))); %find every value of input set greater than the uppermost bound
             Asub = [Asub1 Asub2]; %put all these values together
             Aprob(i) = length(Asub)/Asize; %find proportion of these values relative to input set
-            Bsub1 = B(find(B < bounds(1))); %do the same process as above for failing set
+
+            %do the same process as above for BTS
+
+            Bsub1 = B(find(B < bounds(1)));
             Bsub2 = B(find(B > bounds(length(bounds))));
             Bsub = [Bsub1 Bsub2];
             Bprob(i) = length(Bsub)/Asize;
@@ -21,17 +37,24 @@ function prob = failcases(A,B,err)
             Asub = Asub(find(Asub < bounds(i + 1))); %find every value above the ith bound AND below the (i + 1)th bound
             %if i = 2, then this finds every value between the 2nd and 3rd bound
             Aprob(i) = length(Asub)/Asize; %proportion of these values relative to input set
-            Bsub = B(find(B > bounds(i))); %same process as above for failing set
+
+            %same process as above for failing set
+
+            Bsub = B(find(B > bounds(i)));
             Bsub = Bsub(find(Bsub < bounds(i + 1)));
             Bprob(i) = length(Bsub)/Asize;
         end
     end
-    %The above loop always yields 2 1x4 vectors, but sometimes all 4
-    %regions are not present.
+
+    %The above loop always yields 2 1x4 vectors, but sometimes not all 4
+    %regions are present. Block of code takes the order of the bounds and
+    %constructs a "regions" vector that contains the regions, in the order
+    %they appear on a histogram of regions. This vector acts as the header
+    %row for the probability tables
 
     regions = [];
     if Bbounds(1) >= Abounds(1) && Bbounds(2) >= Abounds(2)
-        regions = [1 2 3 4]; %vector that acts as a header row for probability table    
+        regions = [1 2 3 4]; %vector that acts as a header for prob table    
     elseif Abounds(1) >= Bbounds(1) && Abounds(2) >= Bbounds(2)
         regions = [3 2 1 4];
     elseif Bbounds(1) >= Abounds(1) && Abounds(2) >= Bbounds(2)
@@ -39,11 +62,13 @@ function prob = failcases(A,B,err)
         Bprob = [Bprob(1) + Bprob(3), Bprob(2), Bprob(4)];
         %the above operations cover when Region I is split into 2 subsets
         %and Region III is not present
-        regions = [1 2 4]; %only 3 regions present, so the probability table only has 3 columns!
+
+        regions = [1 2 4]; 
+        %only 3 regions present, probability table only has 3 columns!
     elseif Bbounds(1) <= Bbounds(2) && Bbounds(2) <= Abounds(1)
-        %covers if the bounds have no overlap. Rare case, sometimes comes
-        %up in the gradeability test if you have a very low 'err' value
-        %passed to subhist.m
+        %covers if the bounds have no overlap (Case D in the paper I 
+        % believe??). Rare case, sometimes occurs in the gradeability 
+        % model if you have a very low 'err' value passed to subhist.m
         Aprob = [Aprob(1), Aprob(2) + Aprob(4), Aprob(3)];
         Bprob = [Bprob(1), Bprob(2) + Bprob(4), Bprob(3)];
         regions = [3 4 1];
@@ -56,25 +81,28 @@ function prob = failcases(A,B,err)
 
     prob = [regions; Aprob; Bprob; Bprob./Aprob]; %probability table
     %this table has the region numbers in the first row, the proportion of
-    %the input set belonging to each region in the second row, the proportion of the failing set
-    %belonging to each region in the third row, and the relative proportion of failures in
-    %each region in the fourth row
+    %the input set belonging to each region in the second row, the 
+    %proportion of the BTS belonging to each region in the third
+    %row, and the relative proportion of failures in each region in the 
+    %fourth row
 
 
 
     % On the rare chance that two bounds have the same value, then there
-    % will be a NaN on the 4th row of the prob matrix. This bit checks if
+    % will be a NaN on the 4th row of the prob matrix. This code checks if
     % there is a NaN at all (any NaN thrown into a non-NaN matrix will make
     % the whole matrix sum to NaN), and if there is, goes through and
     % replaces with zero. This is probably a boneheaded way of finding and 
     % replacing NaNs, but it only executes if it fails the first check
-    if isnan(sum(sum(prob)))
-        for j = 1:size(prob,1)
+    if isnan(sum(sum(prob))) %see if the entire matrix sums to NaN
+        for j = 1:size(prob,1) %if it does, go element by element
             for k = 1:size(prob,2)
                 if isnan(prob(j,k))
-                    prob(j,k) = 0;
+                    prob(j,k) = 0; %hardcode existing NaN's as 0
                 end
             end
         end
     end
+
+
 end

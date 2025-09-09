@@ -13,6 +13,13 @@ function prob = failcases(A,B,err)
 %contain 95% of values within the set.
 
     Asize = length(A); %number of values in input set
+
+    if length(B) < 1
+        prob = [1 2 3 4
+                1 0 0 0
+                0 0 0 0
+                0 0 0 0];
+    else
     Bsize = length(B); %number of values in below-threshold set
     Abounds = failprob(A,err);
     Bbounds = failprob(B,err);%two-tailed probability for A and B
@@ -54,9 +61,22 @@ function prob = failcases(A,B,err)
 
     regions = [];
     if Bbounds(1) >= Abounds(1) && Bbounds(2) >= Abounds(2)
-        regions = [1 2 3 4]; %vector that acts as a header for prob table    
+        regions = [1 2 3 4]; %vector that acts as a header for prob table
+
+        prob = [regions; Aprob; Bprob; Bprob./Aprob]; %probability table
+        %this table has the region numbers in the first row, the proportion of
+        %the input set belonging to each region in the second row, the 
+        %proportion of the BTS belonging to each region in the third
+        %row, and the relative proportion of failures in each region in the 
+        %fourth row
     elseif Abounds(1) >= Bbounds(1) && Abounds(2) >= Bbounds(2)
         regions = [3 2 1 4];
+         prob = [regions; Aprob; Bprob; Bprob./Aprob];
+
+         prob = [prob(:,3) prob(:,2) prob(:,1) prob(:,4)];
+         %reordering
+
+
     elseif Bbounds(1) >= Abounds(1) && Abounds(2) >= Bbounds(2)
         Aprob = [Aprob(1) + Aprob(3), Aprob(2), Aprob(4)];
         Bprob = [Bprob(1) + Bprob(3), Bprob(2), Bprob(4)];
@@ -65,6 +85,13 @@ function prob = failcases(A,B,err)
 
         regions = [1 2 4]; 
         %only 3 regions present, probability table only has 3 columns!
+
+        prob = [regions; Aprob; Bprob; Bprob./Aprob];
+
+        prob = [prob(:,1:2) zeros(4,1) prob(:,3)];
+        %column of zeros for Region III which has no values in this case
+
+
     elseif Bbounds(1) <= Bbounds(2) && Bbounds(2) <= Abounds(1)
         %covers if the bounds have no overlap (Case D in the paper I 
         % believe??). Rare case, sometimes occurs in the gradeability 
@@ -72,19 +99,18 @@ function prob = failcases(A,B,err)
         Aprob = [Aprob(1), Aprob(2) + Aprob(4), Aprob(3)];
         Bprob = [Bprob(1), Bprob(2) + Bprob(4), Bprob(3)];
         regions = [3 4 1];
+        prob = [regions; Aprob; Bprob; Bprob./Aprob];
+        prob = [prob(:,3) zeros(4,1) prob(:,1:2)];
+
     else
         Aprob = [Aprob(1) + Aprob(3), Aprob(2), Aprob(4)];
         Bprob = [Bprob(1) + Bprob(3), Bprob(2), Bprob(4)];
         %covers when Region III is split and Region I is not present
         regions = [3 2 4];
-    end
+        prob = [regions; Aprob; Bprob; Bprob./Aprob];
 
-    prob = [regions; Aprob; Bprob; Bprob./Aprob]; %probability table
-    %this table has the region numbers in the first row, the proportion of
-    %the input set belonging to each region in the second row, the 
-    %proportion of the BTS belonging to each region in the third
-    %row, and the relative proportion of failures in each region in the 
-    %fourth row
+        prob = [zeros(4,1) prob(:,2) prob(:,1) prob(:,3)];
+    end
 
 
 
@@ -103,6 +129,6 @@ function prob = failcases(A,B,err)
             end
         end
     end
-
+    end
 
 end

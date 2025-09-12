@@ -1,5 +1,29 @@
 function prob = failcases(A,B,err)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (c) 2025 Edward Louis
+% 
+% Permission is hereby granted, free of charge, to any person obtaining a 
+% copy of this software and associated documentation files (the 
+% "Software"), to deal in the Software without restriction, including 
+% without limitation the rights to use, copy, modify, merge, publish, 
+% distribute, sublicense, and/or sell copies of the Software, and to permit
+% persons to whom the Software is furnished to do so, subject to the 
+% following conditions:
+% 
+% The above copyright notice and this permission notice shall be included 
+% in all copies or substantial portions of the Software.
+% 
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+% IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+% CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+% OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR 
+% THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 %This function used in SREC method. This function takes an input set and
 %below threshold set, BTS. The BTS can either be composed of failures due
 %to all failure modes or due to an individual failrue mode. This code
@@ -89,6 +113,7 @@ function prob = failcases(A,B,err)
         prob = [regions; Aprob; Bprob; Bprob./Aprob];
 
         prob = [prob(:,1:2) zeros(4,1) prob(:,3)];
+        prob(1,3) = 3;
         %column of zeros for Region III which has no values in this case
 
 
@@ -101,6 +126,7 @@ function prob = failcases(A,B,err)
         regions = [3 4 1];
         prob = [regions; Aprob; Bprob; Bprob./Aprob];
         prob = [prob(:,3) zeros(4,1) prob(:,1:2)];
+        prob(1,2) = 2;
 
     else
         Aprob = [Aprob(1) + Aprob(3), Aprob(2), Aprob(4)];
@@ -110,6 +136,7 @@ function prob = failcases(A,B,err)
         prob = [regions; Aprob; Bprob; Bprob./Aprob];
 
         prob = [zeros(4,1) prob(:,2) prob(:,1) prob(:,3)];
+        prob(1,1) = 1;
     end
 
 
